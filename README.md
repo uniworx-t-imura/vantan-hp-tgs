@@ -5,6 +5,7 @@ https://vantan.develop-env.info/www.vantan-game.com/special/tgs
 
 
 ## IntersectionObserver memo 
+```
 const items = document.querySelectorAll(".js-next_page");
   const options = {
   root: null, // ビューポート設定。nullはウィンドウ全体
@@ -24,3 +25,4 @@ function IntersectFunction(elements) {
         }
     });
  }
+```
