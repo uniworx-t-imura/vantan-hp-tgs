@@ -104,29 +104,29 @@ let run_one_func = 0;
 let timerID;
 
 function scrollEv() {
-  let scroll_Top = 0;
+  let scroll_Top = 0;  
+  const bottomItems = document.querySelectorAll(".js-next_page");
+  //.js-next_pageが100％、ビューポート+40pxの中にはいったら発火
+  const IntersectionObserverOptions = {
+    root: null, // ビューポートはウィンドウ全体
+    rootMargin: "0px 0px 40px 0px",
+    threshold: 1 // 
+  };
+  const observer = new IntersectionObserver(IntersectFunction, IntersectionObserverOptions);
+  bottomItems.forEach(item => {
+    observer.observe(item);
+  });
   $(window).on("touchend scroll", function(e) {
-    if (timerID != null) {
-      clearTimeout(timerID);
-    }
     //旧スクロールイベント用
     var doch = $(document).innerHeight();
     var winh = $(window).innerHeight();
     var bottom = doch - winh;
-    var scrollHeight = $(document).height();
-    var scrollPosition = $(window).height() + $(window).scrollTop();
     scroll_Top = $(window).scrollTop();
-
-
-
     if (popstateFlag === 1) {
       popstateFlag = 0;
       run_one_func = 0;
-
       current_data = $(".js-next_page").data("link");
-
       $("body").removeClass("js-pjax_pop");
-
       current_link = link_array[current_data].json;
     } else {
       if (
@@ -137,113 +137,110 @@ function scrollEv() {
         if (!$(".js-pjax_pop").length && run_one_func === 0) {
           run_one_func = 1;
         }
-      }
+      }   
+    }
+  });
+  function IntersectFunction(elements) {
+    // 交差監視をしたもののなかで、isIntersectingがtrueになったとき
+    elements.forEach(element => {
+      if (element.isIntersecting) {
+        console.log("isIntersecting", run_one_func);
+        if (run_one_func === 1) {
+          $(".ttl_pjax_anim").remove();
+          $("body").addClass("js-pjax_anim_02-active");
+          $("body").addClass("js-subpage_openring-active");
+          let dataUrl = $(".js-next_page").data("url");
+          let options = {
+            url: dataUrl + '.html',
+            container: "#pj-container",
+            fragment: "#pj-container",
+            scrollTo: 0
+          };
+          if (timerID != null) {
+            clearTimeout(timerID);
+          }
+          timerID = setTimeout(function () {
+            if ($(".sp").length) {//***
+              run_one_func = 2;
+              current_data = $(".js-next_page").data("link");
+              current_link = link_array[current_data].json;
+              pjax_anim_02_flag = 1;
+              pjax_anim_02(options);
+              if (!$(".article_07").length) {
+                current_data = $(".js-next_page").data("link");
+                current_link = link_array[current_data].json;
+                ttl_pjax_anim(50);
+              }
+              setTimeout(() => {
+                flag = 1;
+              }, 1500);
+              setTimeout(function () {
+                $.pjax(options);
+                scroll_Top = 0;
+                run_one_func = 0;
+                if ($(".article_07").length) {
+                  if ($(".css-vw_hidden").length) {
+                    $(".ttl_anim").remove();
+                  }
+                  $("body").addClass("js-ttl_hidden");
+                }
+              }, 1550);
+            }
+          }, 50);
 
-      if (run_one_func === 1) {
-        timerID = setTimeout(function() {
-          if ($(".sp").length && bottom - 100 <= scroll_Top) {//***
+          if ($(".tablet").length && run_one_func === 1) {
             run_one_func = 2;
-            $("body").addClass("js-pjax_anim_02-active");
-            $("body").addClass("js-subpage_openring-active");
-            $(".ttl_pjax_anim").remove();
             current_data = $(".js-next_page").data("link");
             current_link = link_array[current_data].json;
-            let href = $(".js-next_page").data("link");
-            let options = {
-              url: link_array[href]["url"],
-              container: "#pj-container",
-              fragment: "#pj-container",
-              scrollTo: 0
-            };
             pjax_anim_02_flag = 1;
             pjax_anim_02(options);
-            if (!$(".article_06").length) {
+            if (!$(".article_07").length) {
+              current_data = $(".js-next_page").data("link");
+              current_link = link_array[current_data].json;
               ttl_pjax_anim(50);
             }
             setTimeout(() => {
               flag = 1;
             }, 1500);
-
-            setTimeout(function() {
+            setTimeout(function () {
               $.pjax(options);
               scroll_Top = 0;
               run_one_func = 0;
+              if ($(".article_07").length) {
+                if ($(".css-vw_hidden").length) {
+                  $(".ttl_anim").remove();
+                }
+                $("body").addClass("js-ttl_hidden");
+              }
             }, 1550);
           }
-        }, 50);
-
-        if (
-          $(".tablet").length &&
-          run_one_func == 1 &&
-          bottom - 100 <= scroll_Top//***
-        ) {
-          run_one_func = 2;
-
-          $("body").addClass("js-pjax_anim_02-active");
-          $("body").addClass("js-subpage_openring-active");
-          $(".ttl_pjax_anim").remove();
-          current_data = $(".js-next_page").data("link");
-          current_link = link_array[current_data].json;
-          let href = $(".js-next_page").data("link");
-          let options = {
-            url: link_array[href]["url"],
-            container: "#pj-container",
-            fragment: "#pj-container",
-            scrollTo: 0
-          };
-          pjax_anim_02_flag = 1;
-          pjax_anim_02(options);
-          if (!$(".article_06").length) {
-            ttl_pjax_anim(50);
-          }
-          setTimeout(() => {
-            flag = 1;
-          }, 1500);
-
-          setTimeout(function() {
-            $.pjax(options);
-            scroll_Top = 0;
-            run_one_func = 0;
-          }, 1550);
-        }
-        if ($(".pc").length && bottom == scroll_Top) {//***
-          $(".ttl_pjax_anim").remove();
-
-          $("body").addClass("js-pjax_anim_02-active");
-          $("body").addClass("js-subpage_openring-active");
-          let href = $(".js-next_page").data("link");
-          let options = {
-            url: link_array[href]["url"],
-            container: "#pj-container",
-            fragment: "#pj-container",
-            scrollTo: 0
-          };
-          pjax_anim_02_flag = 1;
-          pjax_anim_02(options);
-          if (!$(".article_06").length) {
-            current_data = $(".js-next_page").data("link");
-            current_link = link_array[current_data].json;
-            ttl_pjax_anim(50);
-          }
-
-          setTimeout(() => {
-            flag = 1;
-          }, 1500);
-          setTimeout(function() {
-            $.pjax(options);
-            scroll_Top = 0;
-            if ($(".article_06").length) {
-              if ($(".css-vw_hidden").length) {
-                $(".ttl_anim").remove();
-              }
-              $("body").addClass("js-ttl_hidden");
+          if ($(".pc").length) {//***
+            pjax_anim_02_flag = 1;
+            pjax_anim_02(options);
+            if (!$(".article_07").length) {
+              current_data = $(".js-next_page").data("link");
+              current_link = link_array[current_data].json;
+              ttl_pjax_anim(50);
             }
-            run_one_func = 0;
-          }, 1550);
+            setTimeout(() => {
+              flag = 1;
+            }, 1500);
+            setTimeout(function () {
+              $.pjax(options);
+              scroll_Top = 0;
+              if ($(".article_07").length) {
+                if ($(".css-vw_hidden").length) {
+                  $(".ttl_anim").remove();
+                }
+                $("body").addClass("js-ttl_hidden");
+              }
+              run_one_func = 0;
+            }, 1550);
+          }
         }
       }
-    }
-  });
+    });
+  }
 }
 
 let article_num_array = {
@@ -598,7 +595,8 @@ if (
     slider_num_03: { json: "loop_title03_sp.json", url: "sub_page_03.html" },
     slider_num_04: { json: "loop_title04_sp.json", url: "sub_page_04.html" },
     slider_num_05: { json: "loop_title05_sp.json", url: "sub_page_05.html" },
-    slider_num_06: { json: "loop_title06_sp.json", url: "sub_page_06.html" }
+    slider_num_06: { json: "loop_title06_sp.json", url: "sub_page_06.html" },
+    slider_num_07: { json: "loop_title07_sp.json", url: "sub_page_07.html" }
   };
   json_array = {
     ring_anim_01: "op_ring_sp.json",
@@ -620,7 +618,8 @@ if (
     slider_num_03: { json: "loop_title03_sp.json", url: "sub_page_03.html" },
     slider_num_04: { json: "loop_title04_sp.json", url: "sub_page_04.html" },
     slider_num_05: { json: "loop_title05_sp.json", url: "sub_page_05.html" },
-    slider_num_06: { json: "loop_title06_sp.json", url: "sub_page_06.html" }
+    slider_num_06: { json: "loop_title06_sp.json", url: "sub_page_06.html" },
+    slider_num_07: { json: "loop_title07_sp.json", url: "sub_page_07.html" }
   };
   json_array = {
     ring_anim_01: "op_ring_sp.json",
@@ -639,7 +638,8 @@ if (
     slider_num_03: { json: "loop_title03.json", url: "sub_page_03.html" },
     slider_num_04: { json: "loop_title04.json", url: "sub_page_04.html" },
     slider_num_05: { json: "loop_title05.json", url: "sub_page_05.html" },
-    slider_num_06: { json: "loop_title06.json", url: "sub_page_06.html" }
+    slider_num_06: { json: "loop_title06.json", url: "sub_page_06.html" },
+    slider_num_07: { json: "loop_title07.json", url: "sub_page_07.html" }
   };
   json_array = {
     ring_anim_01: "op_ring.json",
